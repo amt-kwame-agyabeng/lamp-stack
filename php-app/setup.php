@@ -1,57 +1,82 @@
 <?php
-// Set page title
-$pageTitle = "Database Setup";
+// Include configuration
+require_once 'includes/config.php';
 
-// Include header
-include_once 'includes/header.php';
+// Display header
+require_once 'includes/header.php';
 
-// Include database functions
-require_once 'includes/db_functions.php';
+// Connect to database (works for both local MySQL and RDS)
+try {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS);
+    
+    if ($conn->connect_error) {
+        throw new Exception("Connection failed: " . $conn->connect_error);
+    }
+    
+    echo "<div class='alert alert-success'>Successfully connected to MySQL server at " . DB_HOST . "</div>";
+    
+    // Select database
+    if ($conn->select_db(DB_NAME)) {
+        echo "<div class='alert alert-success'>Database '" . DB_NAME . "' selected successfully</div>";
+    } else {
+        echo "<div class='alert alert-warning'>Database '" . DB_NAME . "' does not exist. Creating it now...</div>";
+        
+        // Create database
+        $sql = "CREATE DATABASE IF NOT EXISTS " . DB_NAME;
+        if ($conn->query($sql) === TRUE) {
+            echo "<div class='alert alert-success'>Database created successfully</div>";
+            $conn->select_db(DB_NAME);
+        } else {
+            throw new Exception("Error creating database: " . $conn->error);
+        }
+    }
+    
+    // Create users table
+    $sql = "CREATE TABLE IF NOT EXISTS users (
+        id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+    
+    if ($conn->query($sql) === TRUE) {
+        echo "<div class='alert alert-success'>Table 'users' created or already exists</div>";
+    } else {
+        throw new Exception("Error creating table: " . $conn->error);
+    }
+    
+    // Check if table is empty
+    $result = $conn->query("SELECT COUNT(*) as count FROM users");
+    $row = $result->fetch_assoc();
+    
+    if ($row['count'] == 0) {
+        echo "<div class='alert alert-info'>Adding sample data to users table...</div>";
+        
+        // Insert sample data
+        $sql = "INSERT INTO users (name, email) VALUES 
+            ('John Doe', 'john@example.com'),
+            ('Jane Smith', 'jane@example.com')";
+            
+        if ($conn->query($sql) === TRUE) {
+            echo "<div class='alert alert-success'>Sample data added successfully</div>";
+        } else {
+            throw new Exception("Error adding sample data: " . $conn->error);
+        }
+    } else {
+        echo "<div class='alert alert-info'>Users table already contains data</div>";
+    }
+    
+    echo "<div class='alert alert-success'>Database setup completed successfully!</div>";
+    
+} catch (Exception $e) {
+    echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+}
 
-// Initialize database
-$init_result = initializeDatabase();
+// Close connection if open
+if (isset($conn) && $conn) {
+    $conn->close();
+}
+
+// Display footer
+require_once 'includes/footer.php';
 ?>
-
-<div class="container mt-5">
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h2>Database Setup</h2>
-        </div>
-        <div class="card-body">
-            <?php if ($init_result['status']): ?>
-                <div class="alert alert-success">
-                    <h4>Database Setup Successful!</h4>
-                    <p><?php echo $init_result['message']; ?></p>
-                    <p>The following has been created:</p>
-                    <ul>
-                        <li>Database: <strong><?php echo DB_NAME; ?></strong></li>
-                        <li>Table: <strong>users</strong> (id, name, email, created_at)</li>
-                    </ul>
-                </div>
-            <?php else: ?>
-                <div class="alert alert-danger">
-                    <h4>Database Setup Failed!</h4>
-                    <p><?php echo $init_result['message']; ?></p>
-                    <p>Please check your database configuration in includes/config.php</p>
-                </div>
-            <?php endif; ?>
-            
-            <h3 class="mt-4">Database Configuration</h3>
-            <p>Current database configuration:</p>
-            <ul>
-                <li>Host: <strong><?php echo DB_HOST; ?></strong></li>
-                <li>User: <strong><?php echo DB_USER; ?></strong></li>
-                <li>Password: <strong>[Hidden]</strong></li>
-                <li>Database Name: <strong><?php echo DB_NAME; ?></strong></li>
-            </ul>
-            
-            <p class="mt-4">To change the database configuration, edit the file: <code>includes/config.php</code></p>
-            
-            <div class="mt-4">
-                <a href="index.php" class="btn btn-primary">Go to Homepage</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php include_once 'includes/footer.php'; ?>

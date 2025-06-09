@@ -1,5 +1,5 @@
--- Create database
-CREATE DATABASE IF NOT EXISTS lamp_test;
+-- This SQL file works for both local MySQL and AWS RDS
+-- For RDS, the database and user are created through Terraform
 
 -- Use the database
 USE lamp_test;
@@ -12,13 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create a user with appropriate permissions
--- Note: Replace 'lamp_password' with a secure password
-CREATE USER IF NOT EXISTS 'lamp_user'@'%' IDENTIFIED BY 'lamp_password';
-GRANT ALL PRIVILEGES ON lamp_test.* TO 'lamp_user'@'%';
-FLUSH PRIVILEGES;
-
--- Insert sample data (optional)
+-- Insert sample data
 INSERT INTO users (name, email) VALUES 
 ('John Doe', 'john@example.com'),
 ('Jane Smith', 'jane@example.com');

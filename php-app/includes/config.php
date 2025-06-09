@@ -1,8 +1,10 @@
 <?php
 // Database configuration
-define('DB_HOST', 'localhost'); // Change to your database server IP or hostname
-define('DB_USER', 'lamp_user');  // Change to your database username
-define('DB_PASS', 'lamp_password'); // Change to your database password
+// For local development, use localhost
+// For production with RDS, use the RDS endpoint
+define('DB_HOST', 'llamp-dev-db.cn8kcow48xsh.eu-west-1.rds.amazonaws.com:3306'); // Change to your RDS endpoint when using AWS
+define('DB_USER', 'lamp_user');  // Database username
+define('DB_PASS', 'pass123456'); // Database password
 define('DB_NAME', 'lamp_test');
 
 // Application settings
