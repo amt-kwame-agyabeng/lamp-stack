@@ -1,219 +1,89 @@
-# AWS LAMP Stack Infrastructure
+# Simple LAMP Stack Application on AWS
 
-This repository contains Terraform code for deploying a highly available and scalable LAMP (Linux, Apache, MySQL, PHP) stack on AWS, following AWS Well-Architected Framework principles.
-
-## Architecture Overview
-
-The infrastructure is designed with the following components:
-
-- **Networking Layer**: Multi-AZ VPC with public and private subnets
-- **Security Layer**: Properly configured security groups for web, database, and load balancer
-- **Compute Layer**: Auto Scaling Group for web servers with Application Load Balancer
-- **Database Layer**: MySQL database server in private subnet
-
-### Architecture Diagram
-
-```
-                                   ┌─────────────────────────────────────────────┐
-                                   │                  AWS Cloud                  │
-                                   │                                             │
-                                   │  ┌─────────────────────────────────────┐    │
-                                   │  │               VPC                   │    │
-                                   │  │                                     │    │
-┌─────────┐                        │  │  ┌─────────────┐   ┌─────────────┐  │    │
-│         │                        │  │  │  Public     │   │  Public     │  │    │
-│ Users   │ ───────────────────────┼──┼─▶│  Subnet AZ1 │   │  Subnet AZ2 │  │    │
-│         │                        │  │  │             │   │             │  │    │
-└─────────┘                        │  │  │  ┌─────┐    │   │  ┌─────┐    │  │    │
-                                   │  │  │  │ ALB ├────┼───┼──┤ ALB │    │  │    │
-                                   │  │  │  └──┬──┘    │   │  └──┬──┘    │  │    │
-                                   │  │  │     │       │   │     │       │  │    │
-                                   │  │  │  ┌──▼──┐    │   │  ┌──▼──┐    │  │    │
-                                   │  │  │  │ Web │    │   │  │ Web │    │  │    │
-                                   │  │  │  │ ASG │    │   │  │ ASG │    │  │    │
-                                   │  │  │  └──┬──┘    │   │  └──┬──┘    │  │    │
-                                   │  │  └─────┼───────┘   └─────┼───────┘  │    │
-                                   │  │        │                 │          │    │
-                                   │  │  ┌─────▼───────┐   ┌─────▼───────┐  │    │
-                                   │  │  │  Private    │   │  Private    │  │    │
-                                   │  │  │  Subnet AZ1 │   │  Subnet AZ2 │  │    │
-                                   │  │  │             │   │             │  │    │
-                                   │  │  │  ┌─────┐    │   │  ┌─────┐    │  │    │
-                                   │  │  │  │ DB  │    │   │  │ DB  │    │  │    │
-                                   │  │  │  └─────┘    │   │  └─────┘    │  │    │
-                                   │  │  └─────────────┘   └─────────────┘  │    │
-                                   │  │                                     │    │
-                                   │  └─────────────────────────────────────┘    │
-                                   │                                             │
-                                   └─────────────────────────────────────────────┘
-```
-
-## Well-Architected Framework Principles
-
-This infrastructure follows AWS Well-Architected Framework principles:
-
-### 1. Operational Excellence
-- Infrastructure as Code (IaC) using Terraform
-- Modular architecture for easier maintenance
-- Consistent tagging strategy
-
-### 2. Security
-- Network segmentation with public and private subnets
-- Security groups with least privilege access
-- SSH access restricted to necessary instances
-
-### 3. Reliability
-- Multi-AZ deployment for high availability
-- Auto Scaling Group for web tier
-- Health checks and automatic recovery
-
-### 4. Performance Efficiency
-- Application Load Balancer for efficient traffic distribution
-- Properly sized instances based on workload requirements
-- Scalable architecture that can grow with demand
-
-### 5. Cost Optimization
-- Auto Scaling to match capacity with demand
-- Appropriate instance types for workload
-- Resource tagging for cost allocation
+This project demonstrates a simple LAMP (Linux, Apache, MySQL, PHP) stack application deployed on AWS using Terraform infrastructure as code.
 
 ## Infrastructure Components
 
-### 1. Networking (01-Networking)
-- VPC with CIDR block as defined in variables
-- 2 Public subnets across different AZs
-- 2 Private subnets across different AZs
-- Internet Gateway for public internet access
-- NAT Gateways for private subnet internet access
-- Route tables for traffic management
+- **VPC** with public and private subnets across multiple availability zones
+- **NAT Gateways** for private subnet internet access
+- **Internet Gateway** for public subnet internet access
+- **RDS MySQL** database (manually created in AWS Management Console) for storing application data
+- **EC2 instances** running in an Auto Scaling Group (min: 2, max: 4)
+- **Application Load Balancer** to distribute traffic
+- **Security Groups** to control access between components
+- **Launch Template** for consistent EC2 instance configuration
 
-### 2. Security (02-Security)
-- Web server security group allowing HTTP, HTTPS, and SSH
-- Database security group allowing MySQL access only from web servers
-- ALB security group allowing HTTP and HTTPS from internet
+## Application
 
-### 3. Compute (03-Compute)
-- Launch template for web servers with Apache and PHP
-- Auto Scaling Group for web servers with desired capacity of 2
-- Application Load Balancer for distributing traffic
-- Database server in private subnet
+The application is a simple PHP page that:
+
+- Connects to a MySQL database
+- Displays a successful database connection message
+- Tracks and displays the total number of visits to the page
 
 ## Deployment Instructions
 
-### Prerequisites
-- AWS CLI configured with appropriate credentials
-- Terraform installed (v1.0.0 or newer)
-- SSH key pair for accessing instances
-
-### Deployment Steps
-
-1. Clone this repository:
+1. Configure your AWS credentials:
    ```
-   git clone <repository-url>
-   cd lamp-stack
+   aws configure
    ```
 
-2. Navigate to the infrastructure directory:
+2. Create an RDS MySQL database instance in the AWS Management Console.
+
+3. Update the `terraform.tfvars` file with your desired values:
    ```
    cd lamp-stack-terraform/infrastructure
+   vim terraform.tfvars
    ```
 
-3. Initialize Terraform:
+4. Initialize and apply the Terraform configuration:
    ```
    terraform init
-   ```
-
-4. Review and customize the `terraform.tfvars` file with your specific values.
-
-5. Plan the deployment:
-   ```
-   terraform plan
-   ```
-
-6. Apply the configuration:
-   ```
    terraform apply
    ```
 
-7. After deployment, access the web application via the ALB DNS name (available in Terraform outputs).
+5. Configure your application to connect to the manually created RDS database.
 
-## LAMP Stack Configuration
+6. Access the application using the ALB DNS name output from Terraform.
 
-### Web Server Configuration
-The web servers are automatically configured with:
-- Apache web server
-- PHP 
-- Sample index.html and info.php pages
+## Infrastructure Architecture
 
-### Database Server Configuration
-After deployment, connect to the database server via SSH and run:
+The infrastructure is organized into three main Terraform modules:
 
-```bash
-# Install MySQL
-sudo yum update -y
-sudo yum install -y mariadb-server
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
+1. **Networking (01-Networking)**: Creates VPC, subnets, internet gateway, NAT gateways, and route tables
+2. **Security (02-Security)**: Defines security groups for web servers, database, and load balancer
+3. **Compute (03-Compute)**: Provisions EC2 instances, auto scaling group, and application load balancer
 
-# Secure MySQL installation
-sudo mysql_secure_installation
+## High Availability and Scalability
 
-# Create database and user
-mysql -u root -p
-CREATE DATABASE lampapp;
-CREATE USER 'lampuser'@'%' IDENTIFIED BY 'your_secure_password';
-GRANT ALL PRIVILEGES ON lampapp.* TO 'lampuser'@'%';
-FLUSH PRIVILEGES;
-EXIT;
-```
+This infrastructure is designed with the following resilience features:
 
-## Connecting Web Application to Database
+- **Multi-AZ Deployment**: Resources are distributed across multiple availability zones
+- **Auto Scaling**: EC2 instances automatically scale based on demand (min: 2, max: 4)
+- **Load Balancing**: Traffic is distributed across healthy instances
+- **Self-healing**: Unhealthy instances are automatically replaced
 
-To connect your PHP application to the MySQL database:
+## Security Considerations
 
-1. Create a database connection file (e.g., `db_connect.php`):
+- Traffic is controlled through security groups with least privilege access
+- Private subnets for sensitive resources
+- NAT Gateways for secure outbound connectivity from private subnets
 
-```php
-<?php
-$servername = "private_ip_of_db_server";
-$username = "lampuser";
-$password = "your_secure_password";
-$dbname = "lampapp";
+## Testing the Infrastructure
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+The application is designed to test the following infrastructure components:
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-echo "Connected successfully";
-?>
-```
-
-2. Upload this file to your web servers.
-
-## Scaling Considerations
-
-This infrastructure is designed to scale automatically:
-
-- **Horizontal Scaling**: The Auto Scaling Group will add or remove web servers based on demand.
-- **Vertical Scaling**: Instance types can be modified in the variables file for more CPU/memory.
-
-
-
-## Security Best Practices
-
-- Restrict SSH access to specific IP ranges in production
-- Implement AWS WAF with the ALB for additional security
-- Enable encryption for data in transit and at rest
-- Rotate database credentials regularly
+- Web server connectivity
+- Database connectivity
+- Load balancer functionality
+- Auto scaling capabilities
 
 ## Cleanup
 
-To destroy the infrastructure when no longer needed:
+To destroy the infrastructure when you're done:
 
 ```
 terraform destroy
 ```
 
+Note: Remember to manually delete the RDS database instance from the AWS Management Console as it was created outside of Terraform.

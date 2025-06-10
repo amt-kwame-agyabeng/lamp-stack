@@ -12,7 +12,6 @@ module "networking" {
     private_rt_name = var.private_rt_name
     private_subnet_name = var.private_subnet_name
     public_subnet_name = var.public_subnet_name
-  
 }
 
 module "security" {
@@ -30,6 +29,8 @@ module "security" {
     alb_sg_name = var.alb_sg_name
 }
 
+
+
 module "compute" {
     source = "./modules/03-Compute"
     owner = var.owner
@@ -40,10 +41,8 @@ module "compute" {
     key_pair_name = var.key_pair_name
     vpc_id = module.networking.vpc_id
     web_sg_id = module.security.web_sg_id
-    db_sg_id = module.security.sql_sg_id
     alb_sg_id = module.security.alb_sg_id
     public_subnet_ids = module.networking.public_subnet_ids
     private_subnet_ids = module.networking.private_subnet_ids
-   
    
 }

@@ -16,6 +16,7 @@ variable "region" {
   
 }
 
+
 #---------------------
 #Variables for Network modules
 #---------------------
