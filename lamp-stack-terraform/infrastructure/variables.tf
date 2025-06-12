@@ -147,3 +147,28 @@ variable "key_pair_name" {
     type = string
    
 }
+
+#---------------------
+#Variables for Database Connection
+#---------------------
+
+variable "db_host" {
+    description = "Database host address"
+    type = string
+}
+
+variable "db_name" {
+    description = "Database name"
+    type = string
+}
+
+variable "db_user" {
+    description = "Database username"
+    type = string
+}
+
+variable "db_password" {
+    description = "Database password"
+    type = string
+    sensitive = true
+}

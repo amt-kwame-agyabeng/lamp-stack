@@ -1,7 +1,7 @@
 # General variables
 owner       = "lamp"
 environment = "dev"
-region      = "us-east-1"
+region      = "eu-west-1"
 
 # Network variables
 vpc_name           = "lamp-vpc"
@@ -27,4 +27,10 @@ alb_sg_name  = "lamp-alb-sg"
 instance_type  = "t2.micro"
 ami_id         = "ami-05328f75b2b57d32d"
 key_pair_name  = "lamp-key-pair"
+
+# Database connection variables
+db_host     = "lamp-dev-db.cn8kcow48xsh.eu-west-1.rds.amazonaws.com"
+db_name     = "lamp_test"
+db_user     = "lamp_user"
+db_password = "password1234567"
 

@@ -30,7 +30,6 @@ module "security" {
 }
 
 
-
 module "compute" {
     source = "./modules/03-Compute"
     owner = var.owner
@@ -44,5 +43,20 @@ module "compute" {
     alb_sg_id = module.security.alb_sg_id
     public_subnet_ids = module.networking.public_subnet_ids
     private_subnet_ids = module.networking.private_subnet_ids
+    db_host = var.db_host
+    db_name = var.db_name
+    db_user = var.db_user
+    db_password = var.db_password
    
+}
+
+module "database" {
+    source = "./modules/04-Database"
+    owner = var.owner
+    environment = var.environment
+    region = var.region
+    db_name = var.db_name
+    db_password = var.db_password
+    private_subnet_ids = module.networking.private_subnet_ids
+    db_sg_id = module.security.db_sg_id
 }

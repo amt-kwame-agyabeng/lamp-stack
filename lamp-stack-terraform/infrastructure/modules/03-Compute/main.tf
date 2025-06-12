@@ -7,6 +7,37 @@ resource "aws_launch_template" "webserver" {
 
     vpc_security_group_ids = [var.web_sg_id]
     
+    user_data = base64encode(<<-EOF
+      #!/bin/bash
+      yum update -y
+      yum install -y httpd git php php-mysqlnd
+      systemctl enable httpd
+      systemctl start httpd
+
+      # Clone the app
+      cd /var/www/html
+      git clone https://github.com/amt-kwame-agyabeng/simple-lamp-stack.git
+
+      # Move the contents up
+      cp -r simple-lamp-stack/* .
+      cp simple-lamp-stack/.env.example .env
+
+      # Overwrite .env with correct credentials
+      cat <<EOT > .env
+      DB_HOST=${var.db_host}
+      DB_NAME=${var.db_name}
+      DB_USER=${var.db_user}
+      DB_PASSWORD=${var.db_password}
+      EOT
+
+      # Set correct ownership and permissions
+      chown -R apache:apache /var/www/html
+      chmod 644 .env
+
+      # Optional: clean up
+      rm -rf simple-lamp-stack
+    EOF
+    )
    
     tag_specifications {
         resource_type = "instance"
@@ -53,7 +84,7 @@ resource "aws_lb_target_group" "web_tg" {
     target_type = "instance"
 
     health_check {
-      path                = "/"
+      path                = "/info.php"
       interval            = 30
       timeout             = 10
       healthy_threshold   = 2
