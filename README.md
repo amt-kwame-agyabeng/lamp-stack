@@ -85,6 +85,105 @@ The application is designed to test the following infrastructure components:
 - Load balancer functionality
 - Auto scaling capabilities
 
+
+## Monitoring, Logging & Observability
+
+This project includes real-time monitoring, centralized logging, and observability for the LAMP stack application deployed behind a load balancer (ALB).
+
+
+
+###  Centralized Logging
+
+**Log Groups:**
+- `apache-access-logs` — stores all HTTP requests handled by Apache.
+- `apache-error-logs` — stores server-side errors from Apache.
+
+**Log Collection:**
+- **Tool:** AWS CloudWatch Agent (installed on EC2 instances)
+- **Log Sources:**
+  - `/var/log/apache2/access.log`
+  - `/var/log/apache2/error.log`
+
+- **Retention:** Default (logs do not expire unless manually configured)
+
+**Sample CloudWatch Agent Config:**
+```json
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/apache2/access.log",
+            "log_group_name": "apache-access-logs",
+            "log_stream_name": "{instance_id}"
+          },
+          {
+            "file_path": "/var/log/apache2/error.log",
+            "log_group_name": "apache-error-logs",
+            "log_stream_name": "{instance_id}"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+## Monitoring & Alerting
+Monitored Metrics via CloudWatch:
+
+EC2 Instances: 
+- CPUUtilization  
+- MemoryUsedPercent
+- DiskUsedPercent
+
+Application Load Balancer (ALB):
+
+- RequestCount - Total number of requests received by the load balancer.
+
+- TargetResponseTime - Average time it takes for the load balancer to receive a response from the target.
+
+- HTTPCode_ELB_5XX_Count - Number of HTTP 5xx errors returned by the load balancer.
+
+- HTTPCode_Target_2XX_Count - Number of HTTP 2xx responses returned by the target.
+
+
+###   Configured CloudWatch Alarms
+
+The following CloudWatch alarms are active to ensure system stability and resource awareness:
+
+| Alarm Name             | Metric               | Condition                                 | Period     | State | Action        |
+|------------------------|----------------------|-------------------------------------------|------------|--------|----------------|
+| HighMemoryAlertTopic   | `mem_used_percent`   | > 22% for 1 datapoint within 1 minute     | 1 minute   | OK     | Actions enabled |
+| HighDiskPercentage     | `disk_used_percent`  | > 85% for 1 datapoint within 5 minutes    | 5 minutes  | OK     | Actions enabled |
+| HighMemoryUsageAlarm   | `cpu_usage_user`     | > 80% for 1 datapoint within 1 minute     | 1 minute   | OK     | Actions enabled |
+
+All alarms are currently in **OK** state and configured to trigger **SNS actions** for alert notifications when thresholds are breached.
+
+### Performance Testing
+
+**Tool Used:** Apache Benchmark (`ab`)
+
+**Command Example:**
+```bash
+ab -n 1000 -c 100 http://lamp-dev-alb-499859236.eu-west-1.elb.amazonaws.com/
+```
+
+Observed During Load Test:
+
+ALB Metrics
+- TargetResponseTime
+- RequestCount
+- EC2 Metrics:
+
+CPUUtilization
+- MemoryUsedPercent
+
+Log Insights:
+- Error spikes captured in apache-error-logs
+- Successful requests captured in apache-access-logs
+
 ## Cleanup
 
 To destroy the infrastructure when you're done:
