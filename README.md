@@ -172,15 +172,11 @@ ab -n 1000 -c 100 http://lamp-dev-alb-499859236.eu-west-1.elb.amazonaws.com/
 
 Observed During Load Test:
 
-ALB Metrics
+## ALB Metrics
 - TargetResponseTime
 - RequestCount
 
-EC2 Metrics:
-- CPUUtilization
-- MemoryUsedPercent
-
-Log Insights:
+## Log Insights:
 - Error spikes captured in apache-error-logs
 - Successful requests captured in apache-access-logs
 
