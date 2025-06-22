@@ -40,7 +40,7 @@ resource "aws_db_parameter_group" "mysql_params" {
 }
 
 resource "aws_db_instance" "rds_mysql" {
-  identifier             = "${local.name_prefix}-db"
+  identifier             = "lamp-dev-db"
   allocated_storage      = var.allocated_storage
   storage_type           = var.storage_type
   engine                 = "mysql"
