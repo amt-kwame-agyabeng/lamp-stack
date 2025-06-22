@@ -175,9 +175,9 @@ Observed During Load Test:
 ALB Metrics
 - TargetResponseTime
 - RequestCount
-- EC2 Metrics:
 
-CPUUtilization
+EC2 Metrics:
+- CPUUtilization
 - MemoryUsedPercent
 
 Log Insights:

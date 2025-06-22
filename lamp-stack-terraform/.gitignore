@@ -4,3 +4,4 @@ terraform.tfstate.backup
 .terraform/
 plan_output
 lampstack.pem
+.DS_Store
