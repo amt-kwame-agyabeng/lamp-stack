@@ -2,6 +2,9 @@
 
 This project demonstrates a simple LAMP (Linux, Apache, MySQL, PHP) stack application deployed on AWS using Terraform infrastructure as code.
 
+# Live Demo
+Access the application using the ALB DNS name output from Terraform: [lamp-dev-alb-499859236.eu-west-1.elb.amazonaws.com](http://lamp-dev-alb-499859236.eu-west-1.elb.amazonaws.com)
+
 ## Infrastructure Components
 
 - **VPC** with public and private subnets across multiple availability zones
@@ -39,8 +42,6 @@ The application is a simple PHP page that:
    terraform init
    terraform apply
    ```
-
-4. Access the application using the ALB DNS name output from Terraform: [lamp-dev-alb-499859236.eu-west-1.elb.amazonaws.com](http://lamp-dev-alb-499859236.eu-west-1.elb.amazonaws.com)
 
 ## Infrastructure Architecture
 
